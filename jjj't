@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>無自覚うつ セルフチェック</title>
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Hiragino Sans", "Noto Sans JP", "BIZ UDPGothic", sans-serif;
+    background: #0f1117;
+    color: #e4e4e7;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  /* ===== Card ===== */
+  .card {
+    background: #1a1b23;
+    border: 1px solid #2a2b35;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    padding: 2rem 1.6rem;
+    box-shadow: 0 8px 40px rgba(0,0,0,.45);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ===== Intro ===== */
+  .intro h1 {
+    font-size: 1.45rem;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: .6rem;
+  }
+  .intro h1 small { display: block; font-size: .82rem; color: #9a9ab0; font-weight: 400; margin-bottom: .3rem; }
+  .intro p { font-size: .88rem; color: #9a9ab0; text-align: center; line-height: 1.7; margin-bottom: 1.5rem; }
+  .btn-start {
+    display: block;
+    width: 100%;
+    padding: .95rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    transition: opacity .2s;
+  }
+  .btn-start:hover { opacity: .85; }
+
+  /* ===== Progress ===== */
+  .progress-wrap { margin-bottom: 1.4rem; }
+  .progress-label { font-size: .78rem; color: #71717a; margin-bottom: .4rem; text-align: right; }
+  .progress-bar { height: 6px; border-radius: 3px; background: #27272a; overflow: hidden; }
+  .progress-bar .fill { height: 100%; width: 0%; background: linear-gradient(90deg, #6366f1, #a78bfa); border-radius: 3px; transition: width .4s ease; }
+
+  /* ===== Question ===== */
+  .question-section { display: none; }
+  .question-section.active { display: block; }
+  .q-number { font-size: .78rem; color: #6366f1; font-weight: 700; margin-bottom: .5rem; }
+  .q-text { font-size: 1.05rem; line-height: 1.75; margin-bottom: 1.5rem; min-height: 3.5em; }
+
+  .choices { display: flex; flex-direction: column; gap: .65rem; }
+  .choice-btn {
+    display: block;
+    width: 100%;
+    padding: .85rem 1rem;
+    border: 1px solid #3a3b48;
+    border-radius: 12px;
+    background: transparent;
+    color: #e4e4e7;
+    font-size: .95rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .12s;
+  }
+  .choice-btn:hover { background: #26273a; border-color: #6366f1; }
+  .choice-btn:active { transform: scale(.98); }
+  .choice-btn .pts { color: #71717a; font-size: .78rem; margin-left: .3rem; }
+
+  /* ===== Result ===== */
+  .result-section { display: none; text-align: center; }
+  .result-section.active { display: block; }
+  .result-emoji { font-size: 2.6rem; margin-bottom: .5rem; }
+  .result-score { font-size: .85rem; color: #71717a; margin-bottom: .3rem; }
+  .result-title { font-size: 1.3rem; font-weight: 700; margin-bottom: .8rem; line-height: 1.5; }
+  .result-msg { font-size: .92rem; color: #a1a1aa; line-height: 1.8; margin-bottom: 1.3rem; }
+  .result-help { font-size: .82rem; color: #9a9ab0; background: #1f1f2e; border-radius: 12px; padding: 1rem; line-height: 1.8; margin-bottom: 1.3rem; }
+  .result-help a { color: #818cf8; text-decoration: underline; }
+
+  .btn-row { display: flex; gap: .6rem; }
+  .btn-row button, .btn-row a {
+    flex: 1;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: .35rem;
+    padding: .8rem;
+    border: 1px solid #3a3b48;
+    border-radius: 12px;
+    background: transparent;
+    color: #e4e4e7;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s;
+  }
+  .btn-row button:hover, .btn-row a:hover { background: #26273a; }
+
+  /* util */
+  .hidden { display: none !important; }
+
+  /* fade animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .35s ease both; }
+</style>
+</head>
+<body>
+
+<div class="card" id="app">
+
+  <!-- ====== INTRO ====== -->
+  <div class="intro" id="intro">
+    <h1>
+      <small>🧠 10問でわかる</small>
+      無自覚うつ<br>セルフチェック
+    </h1>
+    <p>「最近の自分」を振り返って、<br>直感で選んでみてください。</p>
+    <button class="btn-start" onclick="startQuiz()">チェックをはじめる</button>
+  </div>
+
+  <!-- ====== QUESTION ====== -->
+  <div class="question-section" id="questionSection">
+    <div class="progress-wrap">
+      <div class="progress-label" id="progressLabel">1 / 10</div>
+      <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+    </div>
+    <div class="q-number" id="qNumber">Q1</div>
+    <div class="q-text fade-up" id="qText"></div>
+    <div class="choices" id="choices"></div>
+  </div>
+
+  <!-- ====== RESULT ====== -->
+  <div class="result-section" id="resultSection">
+    <div class="result-emoji" id="resultEmoji"></div>
+    <div class="result-score" id="resultScore"></div>
+    <div class="result-title" id="resultTitle"></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <div class="result-help hidden" id="resultHelp"></div>
+    <div class="btn-row">
+      <button onclick="resetQuiz()">もう一度やる</button>
+      <a id="shareBtn" href="#" target="_blank" rel="noopener">Xでシェア</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ========== DATA ==========
+const questions = [
+  "「楽しみだった趣味」が、今は「やらなきゃいけない用事」に感じる。",
+  "友達からの誘いに、返事をするのが後回しになっている。",
+  "お風呂に入る、ゴミを出すといった「当たり前のこと」が、すごく重労働に感じる。",
+  "動画やSNSを見ていても、内容が全然頭に入ってこない。",
+  "しっかり寝たはずなのに、起きた瞬間から「体が重い」と感じる。",
+  "ちょっとしたミスで、「自分はなんてダメなんだ」と自分を責め続けてしまう。",
+  "お腹は空くけれど、「何を食べたいか」がさっぱり思いつかない。",
+  "外では笑顔でいられるけれど、一人になると急にドッと疲れが出る。",
+  "今日着る服や、今日食べるものなど、小さな決断をするのがしんどい。",
+  "1ヶ月後の自分が、元気に笑っている姿がイメージしづらい。"
+];
+
+const choices = [
+  { label: "あてはまる",  pts: 3 },
+  { label: "たまにある",  pts: 1 },
+  { label: "ない",        pts: 0 }
+];
+
+const results = [
+  {
+    min: 0, max: 5,
+    emoji: "☀️",
+    title: "心の体力は十分です",
+    msg: "今のところ心配はなさそうです。\nたまには自分を甘やかしてあげてくださいね。"
+  },
+  {
+    min: 6, max: 15,
+    emoji: "🌥️",
+    title: "心が「お疲れモード」です",
+    msg: "無意識に無理を重ねているかもしれません。\nスマホを置いて、ぼーっとする時間を意識的に作ってみてください。"
+  },
+  {
+    min: 16, max: 23,
+    emoji: "🌧️",
+    title: "心が「ガス欠」に近い状態です",
+    msg: "「まだ大丈夫」と思っていませんか？\n信頼できる人に話を聞いてもらったり、\n心療内科で一度相談してみるのも立派な選択肢です。",
+    help: true
+  },
+  {
+    min: 24, max: 30,
+    emoji: "🆘",
+    title: "今すぐ「心の休息」が必要です",
+    msg: "かなり限界まで頑張ってこられたはずです。\nまずはしっかり休むことを最優先にしてください。\nひとりで抱えず、どうか周りの力を借りてください。",
+    help: true
+  }
+];
+
+const helpHTML = `つらいときは一人で抱えないでください。<br>
+  <strong>よりそいホットライン</strong>：<a href="tel:0120-279-338">0120-279-338</a>（24時間）<br>
+  <strong>いのちの電話</strong>：<a href="tel:0570-783-556">0570-783-556</a>`;
+
+// ========== STATE ==========
+let currentQ = 0;
+let score = 0;
+
+// ========== DOM ==========
+const $intro      = document.getElementById("intro");
+const $qSection   = document.getElementById("questionSection");
+const $qNumber    = document.getElementById("qNumber");
+const $qText      = document.getElementById("qText");
+const $choices    = document.getElementById("choices");
+const $progLabel  = document.getElementById("progressLabel");
+const $progFill   = document.getElementById("progressFill");
+const $result     = document.getElementById("resultSection");
+
+function startQuiz() {
+  $intro.classList.add("hidden");
+  $qSection.classList.add("active");
+  currentQ = 0;
+  score = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  $progLabel.textContent = `${currentQ + 1} / ${questions.length}`;
+  $progFill.style.width  = `${((currentQ) / questions.length) * 100}%`;
+  $qNumber.textContent   = `Q${currentQ + 1}`;
+
+  // fade animation reset
+  $qText.classList.remove("fade-up");
+  void $qText.offsetWidth;
+  $qText.classList.add("fade-up");
+  $qText.textContent = questions[currentQ];
+
+  $choices.innerHTML = "";
+  choices.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.innerHTML = `${c.label}`;
+    btn.addEventListener("click", () => answer(c.pts));
+    $choices.appendChild(btn);
+  });
+}
+
+function answer(pts) {
+  score += pts;
+  currentQ++;
+  if (currentQ < questions.length) {
+    showQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  $qSection.classList.remove("active");
+  $progFill.style.width = "100%";
+
+  const r = results.find(r => score >= r.min && score <= r.max);
+
+  document.getElementById("resultEmoji").textContent = r.emoji;
+  document.getElementById("resultScore").textContent = `あなたのスコア：${score} / 30`;
+  document.getElementById("resultTitle").textContent = r.title;
+  document.getElementById("resultMsg").innerHTML     = r.msg.replace(/\n/g, "<br>");
+
+  const $help = document.getElementById("resultHelp");
+  if (r.help) {
+    $help.innerHTML = helpHTML;
+    $help.classList.remove("hidden");
+  } else {
+    $help.classList.add("hidden");
+  }
+
+  // share
+  const shareText = `【無自覚うつセルフチェック】結果：${r.title}（${score}/30点）`;
+  document.getElementById("shareBtn").href =
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(location.href)}`;
+
+  $result.classList.add("active");
+  $result.classList.add("fade-up");
+}
+
+function resetQuiz() {
+  $result.classList.remove("active", "fade-up");
+  $intro.classList.remove("hidden");
+}
+</script>
+
+</body>
+</html>
+
